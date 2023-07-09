@@ -1,8 +1,11 @@
 import fetch from 'node-fetch';
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
 
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+// const express = require('express');
+// const cors = require('cors');
+// require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5500;
@@ -18,12 +21,16 @@ app.use(express.static('website', {
   }
 }));
 
-app.post('/weather', async (req, res) => {
-  const { zip, feelings } = req.body;
+app.post('/getWeather', async (req, res) => {
+  const { zip, countryCode, feelings } = req.body;
 
   try {
-    const apiKey = '31f678bba3c481a6499309ca1c6a2874';
-    const weatherData = await fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${zip}`);
+    const apiKey = '3a4f71ba50bab790d1cad75ea3699ce9';
+    const baseURL = new URL(`http://api.openweathermap.org/data/2.5/weather?zip=${zip},${countryCode}&`);
+    baseURL.searchParams.set("APPID", `${apiKey}`);
+    console.log(baseURL);
+
+    const weatherData = await fetch(baseURL);
     const weatherJson = await weatherData.json();
 
     // Extract relevant weather information
@@ -35,12 +42,13 @@ app.post('/weather', async (req, res) => {
     // Create a response object with the weather data and feelings input
     const response = {
       date: currentDate,
-      temperature: temp_c,
-      humidity: humidity,
+      temperature: weatherJson.current.main.temp_c,
+      humidity: weatherJson.current.main.humidity,
       feelings: feelings
     };
 
     res.json(response);
+    response.end;
   } catch (error) {
     console.log('Error occurred:', error);
     res.status(500).json({ error: 'Unable to complete your request.  Please try again.' });
