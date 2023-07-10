@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await fetch('baseURL', {
         method: 'POST',
         credentials: 'same-origin',
-        mode: cors,
+        mode: 'cors',
         headers: {
           'Content-Type': 'application/json'
         },
