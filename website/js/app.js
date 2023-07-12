@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ zip, feelings, countryCode })
+        body: JSON.stringify(data)
       });
 
       if (response.ok) {

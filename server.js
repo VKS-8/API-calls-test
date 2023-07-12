@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -20,21 +19,35 @@ app.use(express.static('website', {
     }
   }
 }));
+app.use(dotenv.config());
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  );
+  next();
+});
+
+app.get('/getWeather', (req, res) => {
+  res.json('Hello');
+});
 
 app.post('/getWeather', async (req, res) => {
-  const { zip, countryCode, feelings } = req.body;
+  const { zip, countryCode, feelings } = res.body;
 
   try {
-    const apiKey = '3a4f71ba50bab790d1cad75ea3699ce9';
-    const baseURL = new URL(`http://api.openweathermap.org/data/2.5/weather?zip=${zip},${countryCode}&`);
-    baseURL.searchParams.set("APPID", `${apiKey}`);
-    console.log(baseURL);
+    const apiKey = 'a308e7287b4c480280bef12289998f2c';
+    const endpoint = new URL(`http://api.openweathermap.org/data/2.5/weather?${setZipParams}&APPID=${apiKey}`);
+    const setZipParams = `zip=${zip},${countryCode}`;
+    console.log(endpoint);
 
-    const weatherData = await fetch(baseURL);
+    const weatherData = await fetch('/getWeather', endpoint);
     const weatherJson = await weatherData.json();
 
     // Extract relevant weather information
-    const { temp_c, humidity } = weatherJson.current;
+    const { temp, humidity } = weatherJson.current;
 
     // Get the current date
     const currentDate = new Date().toLocaleDateString();
@@ -42,7 +55,7 @@ app.post('/getWeather', async (req, res) => {
     // Create a response object with the weather data and feelings input
     const response = {
       date: currentDate,
-      temperature: weatherJson.current.main.temp_c,
+      temperature: weatherJson.current.main.temp,
       humidity: weatherJson.current.main.humidity,
       feelings: feelings
     };
